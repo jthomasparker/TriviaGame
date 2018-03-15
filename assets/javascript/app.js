@@ -1,3 +1,9 @@
+// TODO: 
+// add questions, answers, fun facts, and final page
+
+
+
+
 var btnStart = $("<button>").attr({"class":"btn btn-default"});
 var initialTimer = 30;
 var timer;
@@ -5,96 +11,147 @@ var winCount = 0;
 var lossCount = 0;
 var correctCount = 0;
 var incorrectCount = 0;
-var question = $("<h2>");
-var  answerDiv = $("<div>")
-var qText = "";
-var aText = "";
+var questionDiv = $("<h2>");
+var  answerDiv = $("<p>")
+//var qText = "";
+//var aText = "";
 var qCount = 0;
-var correctAnswer = "";
+var correctAnswer;
+var userAnswer;
 var timerActive = false;
 var intervalId;
+var activeGame = false;
+
+
+var questionContent = [{
+     question: "Which of the following actually exist?",
+     options: ["Sasquatch", "Chupacrabra", "Jersey Devil", "Loch Ness Monster", "Mermaids"],
+     answer: 'Sasquatch',
+     userAnswer: '',
+     correct: false
+},
+{
+    question: "Question two?",
+    options: ["correct2", "inc2.1", "inc2.2", "inc2.3", "inc2.4"],
+    answer: 'correct2',
+    userAnswer: '',
+    correct: false
+} ]
 
 window.onload = function() {
+// load initial timer
+var convertedTimer = convertTime(initialTimer)
+$("#timer").html(convertedTimer)
+
+// load initial score
+updateScoreboard();
+
+// load start button
 btnStart.text("Start Game");
-$("#content").append(btnStart);
+answerDiv.html("<br>Hint: For a real challenge, click the timer before starting the game!")
+$("#content").append(btnStart, answerDiv);
+
+// click events for timer and start button
+$("#timer").on("click", function(){
+    adjustTimer();
+})
 btnStart.on("click", function(){
     startGame();
 })
-
 }
 
-var questions = ["Which of the following actually exist?", "question2", "question3"]
-var incorrect1 = ["Chupacrabra", "Jersey Devil", "Loch Ness Monster", "Mermaids"]
-var incorrect2 = ["inc2.1", "inc2.2", "inc2.3", "inc2.4"]
-var allIncorrect = [incorrect1, incorrect2]
-var correctAns = ["Sasquatch", "Correct2", "Correct3"]
 
+// adjusts timer on click on start screen
+function adjustTimer(){
+    if(!activeGame){
+        if(initialTimer > 0){
+            initialTimer -= 5;
+        } else {
+            initialTimer = 30;
+        }  
+        var convertedTimer = convertTime(initialTimer)
+        $("#timer").html(convertedTimer)
+    } 
+}
+
+// starts the game
 function startGame(){
+    activeGame = true;
+    //shuffle questions
+    questionContent = shuffle(questionContent)
+    //display question
    nextQuestion()
 }
 
 function nextQuestion(){
-    qText = questions[qCount];
-    correctAnswer = correctAns[qCount];
-    var ansArr = shuffleAnswers(allIncorrect[qCount])
-    answerDiv.text("")
-    question.text(questions[qCount]);
-    $("#content").html(question);
-    for(var i = 0; i < ansArr.length; i++){
+    // Shuffle options, clear answerDiv
+    var shuffledOptions = shuffle(questionContent[qCount].options)
+    answerDiv.text("");
+    // Save correct answer to global for easier access
+    correctAnswer = questionContent[qCount].answer
+    // Populate question text
+    questionDiv.text(questionContent[qCount].question)
+    $("#content").html(questionDiv);
+    $("#title").html("Question " + (qCount + 1))
+    // Populate options as buttons
+    for(var i = 0; i < shuffledOptions.length; i++){
         $("<button>")
-        .attr({"class": "btn btn-default ansBtn", "value": ansArr[i]})
-        .text(ansArr[i])
+        .attr({"class": "btn btn-default ansBtn", "value": shuffledOptions[i]})
+        .text(shuffledOptions[i])
         .appendTo(answerDiv)
         .click(function(){
-            var userAnswer = this.value;
-            processGuess(userAnswer)
-        })
-        $(answerDiv).append("<p>")   
+            userAnswer = this.value;
+            questionContent[qCount].userAnswer = userAnswer;
+            showResult(userAnswer)
+        })   
     }
     
     $("#content").append(answerDiv);
-    startTimer(initialTimer);
-    
-    
+    startTimer(initialTimer); 
     }
     
-    
-function shuffleAnswers(array){
-    array.push(correctAnswer);
+  // shuffles and returns shuffled array  
+function shuffle(array){
     for(i = 0; i < array.length; i++){
         var j = Math.floor(Math.random() * array.length)
         temp = array[i]
         array[i] = array[j]
         array[j] = temp
     }
-    return array;
-}
+    return array; 
+} 
 
-function processGuess(userAnswer){
-    stopTimer();
-    
-    if(userAnswer == correctAnswer){
-     //   alert("Correct!")
-        $("#content").html("Correct!");
-        $(answerDiv).text("You got it! " + userAnswer + " is the correct answer!")
-        $("#content").append(answerDiv);
+function showResult(userAnswer){
+    var message;
+    if(timerActive){
+        stopTimer();
+        if(userAnswer == correctAnswer){
+            questionDiv.text("Correct!")
+            message = "You got it! " + userAnswer + " is the correct answer!";
+            correctCount++
+            questionContent[qCount].correct = true;
+        } else {
+            questionDiv.text("Wrong!");
+            message = "Your Answer: " + userAnswer + "<br>" + "Correct Answer: " + correctAnswer;
+            incorrectCount++
+        }
     } else {
-     //   $("#content").html("Wrong!");
-    //    $(answerDiv).text("Nope, that's incorrect.")
-    //    $(answerDiv).append("Your Answer: " + userAnswer);
-     //   $(answerDiv).append("Correct Answer: " + correctAns); */
-      //  alert(userAnswer + " " + correctAnswer)
+        questionDiv.text("Time's Up!")
+        message = "The Correct Answer was " + correctAnswer;
+        incorrectCount++
     }
-    startTimer(4)
+
+    $("#content").html(questionDiv);
+    $(answerDiv).html(message).appendTo("#content");
     qCount++
-    // TODO: while timer is active, display page, otherwise go to nextquestion
-
-    
+    updateScoreboard();
+    if(activeGame){
+    setTimeout(nextQuestion, 3000)
+    } else {
+        setTimeout(gameOver, 3000)
+    }
 }
 
-function showAnswer(result){
-
-}
 
 function startTimer(startValue){
     if(!timerActive){
@@ -107,13 +164,39 @@ function startTimer(startValue){
 function stopTimer(){
     clearInterval(intervalId);
     timerActive = false;
-    
+    $("#timer").html("00:00") 
 }
 
 function timerCountdown(){
         timer--
-        $("#timer").text(timer)
+        var convertedTimer = convertTime(timer)
+        $("#timer").html(convertedTimer)
         if(timer === 0){
             stopTimer();
+            userAnswer = "";
+            showResult(userAnswer)
         }
+}
+
+function convertTime(t){
+    if(t < 10){
+        t = "00:0" + t
+    } else {
+        t = "00:" + t
+    }
+    return t;
+}
+
+function updateScoreboard(){
+    $("#scoreboard-left").html("0" + correctCount);
+    $("#scoreboard-right").html("0" + incorrectCount);
+    if(qCount + 1 == questoinContent.length){
+        activeGame = false;
+    }
+// var score = correctCount + " / " + qCount
+// var percent = (Math.round((correctCount/qCount) * 100)) + "%"
+}
+
+function gameOver(){
+
 }

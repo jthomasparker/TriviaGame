@@ -1,10 +1,45 @@
-.ansBtn{
-    background-color: transparent;
-    border: none;
-    width: 100%
+@font-face{
+    font-family: digital-7;
+    src: url("../style-7_digital-7/digital-7 (mono).ttf")
 }
 
-h2{
+.btn{
+    width: 100%
+}
+.ansBtn{
+    background-color: transparent;
+    border: none; 
+}
+
+h2, p{
     width: 100%;
     text-align: center;
+}
+
+
+
+.scoreboard-content{
+    font-family: digital-7;
+    background: black;
+    color: yellow;
+    font-size: 250%; 
+    border-style: solid;
+    border-color: white;
+    height: 50px;
+    line-height: 125%;
+    margin-top: 0px;
+    
+}
+
+
+
+#scoreboard-title{
+    font-family: digital-7;
+    color: white;
+    text-align: center;
+}
+
+#scoreboard{
+    background: gray;
+    padding: none;
 }
