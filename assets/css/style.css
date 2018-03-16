@@ -52,3 +52,8 @@ h2, p{
     background: gray;
     padding: none;
 }
+
+.msgDiv{
+    font-weight: bold;
+    font-size: 16px;
+}

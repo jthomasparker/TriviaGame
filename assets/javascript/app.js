@@ -8,11 +8,16 @@
 // Globals
 var btnStart = $("<button>").attr({"class":"btn btn-default"});
 var questionDiv = $("<h2>");
-var  answerDiv = $("<p>");
+var answerDiv = $("<p>").attr({"class":"msgDiv"});
+//var messageDiv = $("<div>").attr({"class":"msgDiv"});
 var initialTimer = 30;
 var timer;
 var time;
 var totalTime = 0;
+var recordTime = 0;
+var wins = 0;
+var losses = 0;
+var ties = 0;
 var correctCount = 0;
 var incorrectCount = 0;
 var qCount = 0;
@@ -21,6 +26,8 @@ var userAnswer;
 var timerActive = false;
 var intervalId;
 var activeGame = false;
+var scoreboardSwitcher = true;
+var gameCount = 0;
 
 // Q & A object array
 var questionContent = [{
@@ -62,6 +69,15 @@ window.onload = function() {
 
     $("#timer").on("click", function(){
         adjustTimer();
+    })
+
+    $("#scoreboard-title").on("click", function(){
+        if(scoreboardSwitcher){
+            scoreboardSwitcher = false;
+        } else {
+            scoreboardSwitcher = true;
+        }
+    updateScoreboard();
     })
 }
 
@@ -174,8 +190,9 @@ function showResult(userAnswer){
         incorrectCount++;
     }
 
-    //update the time in the object
+    //update the time in the object and update totalTime
     questionContent[qCount].time = time;
+    totalTime += time;
 
     // display the results
     $("#content").html(questionDiv);
@@ -221,7 +238,6 @@ function timerCountdown(){
         $("#timer").html(convertedTimer)
         
         time = initialTimer - timer
-        totalTime += time;
 
         // stop it at 0 and go to result screen
         if(timer === 0){
@@ -246,10 +262,36 @@ function convertTime(t){
 
 
 // updates the scoreboard and stops the game when there are no more questions
-//TODO: Need to create some logic to handle 2-digits. Hard-coding a '0' in front of the score = bad
 function updateScoreboard(){
-    $("#scoreboard-left").html("0" + correctCount);
-    $("#scoreboard-right").html("0" + incorrectCount);
+    //format scoreboard
+    if(scoreboardSwitcher){
+        var convertedTimer = convertTime(initialTimer)
+        $("#timer").html(convertedTimer)
+        $("#scoreboard-lbl-left").html("HOME");
+        $("#scoreboard-lbl-center").html("CLOCK");
+        $("#scoreboard-lbl-right").html("AWAY");
+        // format scores
+        if(correctCount > 9){
+            $("#scoreboard-left").html(correctCount);
+        } else {
+            $("#scoreboard-left").html("0" + correctCount);
+        }
+
+        if(incorrectCount > 9){
+            $("#scoreboard-right").html(incorrectCount);
+        } else {
+            $("#scoreboard-right").html("0" + incorrectCount);
+        }
+    } else {
+        var convertedRecord = convertTime(recordTime)
+        $("#scoreboard-lbl-left").html("WINS");
+        $("#scoreboard-lbl-center").html("BEST");
+        $("#scoreboard-lbl-right").html("LOSSES");
+        $("#scoreboard-left").html(wins)
+        $("#timer").html(convertedRecord)
+        $("#scoreboard-right").html(losses)
+    }
+    
     if(qCount === questionContent.length){
         activeGame = false;
     }
@@ -264,8 +306,25 @@ function gameOver(){
     var avgTime = totalTime / qCount
     $("#title").html("Game Over")
     questionDiv.html("Grade: " + percent);
-    answerDiv.html("<strong>You answered " + correctCount + " out of " + qCount + " questions correctly<br>" +
-                    "Average Time per Question: " + avgTime + " second(s)</strong><br>")
+    answerDiv.html("<p>You answered " + correctCount + " out of " + qCount + " questions correctly<br>" +
+                    "Average Time per Question: " + avgTime + " second(s)</p><br>")
+
+    
+    //compare avg time to record avg
+    if(gameCount === 0 || avgTime < recordTime){
+        answerDiv.append("<p>New Record Time! Previous record was " + recordTime + " seconds! </p>");
+        recordTime = Math.round(avgTime);
+    } 
+
+
+    // add to win or loss totals
+    if(correctCount === incorrectCount){
+        ties++
+    } else if(correctCount > incorrectCount){
+        wins++
+    } else {
+        losses++
+    }
     
     //loop through the object array and get the results
     for(i = 0; i < questionContent.length; i++){
@@ -288,7 +347,7 @@ function gameOver(){
                     "Your Answer: " + qc.userAnswer + "<br>" + 
                     "Time: " + qc.time + " seconds <br>" +
                     result + "<br>" ;
-                    answerDiv.append(message);
+            answerDiv.append(message);
 
             // reset it while we're looping
             qc.userAnswer = '';  
@@ -316,9 +375,11 @@ function gameOver(){
 // resets the variables
 function resetVar(){
     qCount = 0;
-    var correctCount = 0;
-    var incorrectCount = 0;
-    var totalTime = 0;
+    correctCount = 0;
+    incorrectCount = 0;
+    totalTime = 0;
+    gameCount++;
+    scoreboardSwitcher = true;
     $("#restart").html("")
     updateScoreboard();
     startGame();
