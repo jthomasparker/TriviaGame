@@ -428,7 +428,7 @@ function gameOver(){
                     "Correct Answer: " + qc.answer + "<br>" +
                     "Your Answer: " + qc.userAnswer + "<br>" + 
                     "Time: " + qc.time + " seconds <br>" +
-                    "Bonus Info: " + qc.bonus + "<br>" +
+                //    "Bonus Info: " + qc.bonus + "<br>" +
                     result + "<br>" ;
             answerDiv.append(message);
 
