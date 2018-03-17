@@ -1,15 +1,10 @@
-// TODO: 
-// add questions, answers, fun facts, avg time
-// total wins/losses
-// fix score format
-
+// TODO: add some color, categories...
 
 
 // Globals
 var btnStart = $("<button>").attr({"class":"btn btn-default"});
 var questionDiv = $("<h2>");
-var answerDiv = $("<p>").attr({"class":"msgDiv"});
-//var messageDiv = $("<div>").attr({"class":"msgDiv"});
+var answerDiv = $("<p>")
 var initialTimer = 30;
 var timer;
 var time;
@@ -30,23 +25,97 @@ var scoreboardSwitcher = true;
 var gameCount = 0;
 
 // Q & A object array
+// P.S. Have fun with bigfoot trivia =)
 var questionContent = [{
      question: "Which of the following actually exist?",
      options: ["Sasquatch", "Chupacrabra", "Jersey Devil", "Loch Ness Monster", "Mermaids"],
      answer: 'Sasquatch',
      userAnswer: '',
      correct: false,
-     time: 0
+     time: 0,
+     bonus: 'Obviously...'
 },
 {
-    question: "Question two?",
-    options: ["correct2", "inc2.1", "inc2.2", "inc2.3", "inc2.4"],
-    answer: 'correct2',
+    question: "What is the estimated average height of the Sasquatch population?",
+    options: ["7ft 10in", "7ft 0in", "8ft 2in", "6ft 11in", "8ft 1in"],
+    answer: '7ft 10in',
     userAnswer: '',
     correct: false,
-    time: 0
-} ]
-
+    time: 0,
+    bonus: 'http://www.bigfootencounters.com/biology/henner.htm'
+},
+{
+    question: "Was the so-called 'Patterson film' Sasquatch male or female?",
+    options: ["Male", "Female", "Unknown"],
+    answer: 'Female',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'http://www.bigfootencounters.com/biology/henner.htm'
+},
+{
+    question: "How far back do Bigfoot legends date in North America?",
+    options: ["at least 3000 years", "2000-3000 years", "1000-2000 years", "500-1000 years", "last 500 years"],
+    answer: 'at least 3000 years',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'http://allthatsinteresting.com/bigfoot-facts#2'
+},
+{
+    question: "Where do the majority of Bigfoot sightings occur (in the US)?",
+    options: ["Pacific NW", "Southeast/Appalacian Mtns", "Midwest", "South FL", "Southwest"],
+    answer: 'Pacific NW',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'Abouut 1/3 of all Bigfoot sightings occur in the Pacific Northwest'
+},
+{
+    question: "According to the Bigfoot Field Researchers Org, what is the esitmated North American Sasquatch population size?",
+    options: ["2000-6000", "3000-8000", "4000-9000", "10,000+", "500-2000"],
+    answer: '2000-6000',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'https://www.bfro.net/gdb/show_FAQ.asp?id=415'
+},
+{
+    question: "How many Bigfoot sightings have occured in North America that have been reported, investigated, and documented by the Bigfoot Field Researchers Org?",
+    options: ["5000-5200", "4000-4200", "3000-3200", "6000-6200", "2000-2200"],
+    answer: '5000-5200',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: '5,149 to be exact'
+},
+{
+    question: "What's another name for Sasquatch?",
+    options: ["Midnight Whistler", "Skunk Monkey", "Hairy Guy", "Gorrilla Man", "Swamp Creature"],
+    answer: 'Midnight Whistler',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'Midnight Whistler is thought to be the earliest North American name of Bigfoot, a term originally coined by the Iroquois Indians'
+},
+{
+    question: "What is Bigfoot called in South America?",
+    options: ["Mapingauri", "Orang Pendek", "Wendigo", "Almas", "Mono de la Mofeta"],
+    answer: 'Mapingauri',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'https://exemplore.com/cryptids/Names-for-Bigfoot-Around-the-World'
+},
+{
+    question: "What county in GA has the most reported Bigfoot sightings?",
+    options: ["White", "Fulton", "Bartow", "Paulding", "Cherokee", "Walker"],
+    answer: 'White',
+    userAnswer: '',
+    correct: false,
+    time: 0,
+    bonus: 'White County has 11 sightings. Paulding comes in second at 9'
+}]
 
 
 window.onload = function() {
@@ -59,10 +128,13 @@ window.onload = function() {
 
     // load start button and initial message
     btnStart.text("Start Game");
-    answerDiv.html("<br>Hint: For a real challenge, click the timer before starting the game!")
+    
+    answerDiv.html("<p>Hint: For a real challenge, click the timer before starting the game!</p>" 
+    + "<p>Also, click the scoreboard labels to toggle its display between the current game score and overall record</p>")
+   .attr({"class":"msg"});
     $("#content").append(btnStart, answerDiv);
 
-    // click events for timer and start button
+    // click events for start button, timer, and scoreboard
     btnStart.on("click", function(){
         startGame();
     })
@@ -77,15 +149,16 @@ window.onload = function() {
         } else {
             scoreboardSwitcher = true;
         }
-    updateScoreboard();
+        updateScoreboard();
     })
 }
 
 
 
+
 // adjusts timer on click at start and end screens
 function adjustTimer(){
-    if(!activeGame){
+    if(!activeGame && scoreboardSwitcher){
         if(initialTimer > 0){
             initialTimer -= 5;
         } else {
@@ -191,6 +264,9 @@ function showResult(userAnswer){
     }
 
     //update the time in the object and update totalTime
+    if(typeof time != 'number'){
+        time = 0;
+    }
     questionContent[qCount].time = time;
     totalTime += time;
 
@@ -214,7 +290,7 @@ function showResult(userAnswer){
 // starts the timer
 function startTimer(startValue){
     if(!timerActive){
-        timer = startValue + 1;
+        timer = startValue;
         intervalId = setInterval(timerCountdown, 1000)
         timerActive = true;
     }
@@ -225,7 +301,7 @@ function startTimer(startValue){
 function stopTimer(){
     clearInterval(intervalId);
     timerActive = false;
-    $("#timer").html("00:00") 
+    $("#timer").html("00:00");
 }
 
 
@@ -237,6 +313,7 @@ function timerCountdown(){
         var convertedTimer = convertTime(timer)
         $("#timer").html(convertedTimer)
         
+        // calc elapsed time for question
         time = initialTimer - timer
 
         // stop it at 0 and go to result screen
@@ -263,8 +340,9 @@ function convertTime(t){
 
 // updates the scoreboard and stops the game when there are no more questions
 function updateScoreboard(){
-    //format scoreboard
+    
     if(scoreboardSwitcher){
+        // display current score/time
         var convertedTimer = convertTime(initialTimer)
         $("#timer").html(convertedTimer)
         $("#scoreboard-lbl-left").html("HOME");
@@ -282,6 +360,7 @@ function updateScoreboard(){
         } else {
             $("#scoreboard-right").html("0" + incorrectCount);
         }
+        // displays total wins/losses and best avg time
     } else {
         var convertedRecord = convertTime(recordTime)
         $("#scoreboard-lbl-left").html("WINS");
@@ -291,7 +370,7 @@ function updateScoreboard(){
         $("#timer").html(convertedRecord)
         $("#scoreboard-right").html(losses)
     }
-    
+    // stops the game if this was the last question
     if(qCount === questionContent.length){
         activeGame = false;
     }
@@ -301,18 +380,21 @@ function updateScoreboard(){
 // processes all results and displays them, plus adds a restart game button
 function gameOver(){
     var message;
-    var restartMessage = "<br>Don't forget to click the timer if you want to make next round harder or easier!"
+    var restartMessage = "<p>Don't forget to click the timer if you want to make next round harder or easier!</p>" +
+    "<p>Also, click the scoreboard labels to see your overall record!"
     var percent = (Math.round((correctCount/qCount) * 100)) + "%"
     var avgTime = totalTime / qCount
+
     $("#title").html("Game Over")
     questionDiv.html("Grade: " + percent);
-    answerDiv.html("<p>You answered " + correctCount + " out of " + qCount + " questions correctly<br>" +
-                    "Average Time per Question: " + avgTime + " second(s)</p><br>")
+    answerDiv.html("<p><strong>You answered " + correctCount + " out of " + qCount + " questions correctly<br>" +
+                    "Average Time per Question: " + avgTime + " second(s)</strong></p><br>")
 
     
     //compare avg time to record avg
     if(gameCount === 0 || avgTime < recordTime){
         answerDiv.append("<p>New Record Time! Previous record was " + recordTime + " seconds! </p>");
+        // TODO: add formatting logic for the scoreboard so the record doesn't have to be rounded
         recordTime = Math.round(avgTime);
     } 
 
@@ -346,6 +428,7 @@ function gameOver(){
                     "Correct Answer: " + qc.answer + "<br>" +
                     "Your Answer: " + qc.userAnswer + "<br>" + 
                     "Time: " + qc.time + " seconds <br>" +
+                    "Bonus Info: " + qc.bonus + "<br>" +
                     result + "<br>" ;
             answerDiv.append(message);
 
@@ -354,16 +437,9 @@ function gameOver(){
             qc.time = 0;           
     }
 
-    
-
-    // poke some fun
-    if(initialTimer > 19){
-        restartMessage = restartMessage + "<br>" + initialTimer + " seconds is way too much time. Come on, click the timer and try again!"
-    }
-
     //display restart button and message
     btnStart.text("Play Again!").attr({"id":"reset"})
-    $("#restart").append(btnStart, restartMessage);
+    $("#restart").append(btnStart, restartMessage).attr({"class":"msg"})
 
     // on click, reset the variables
     btnStart.on("click", function(){

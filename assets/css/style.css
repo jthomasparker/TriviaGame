@@ -48,12 +48,20 @@ h2, p{
     text-align: center;
 }
 
+#scoreboard-title:hover, .scoreboard-content:hover{
+    cursor: pointer;
+}
+
 #scoreboard{
     background: gray;
     padding: none;
 }
 
-.msgDiv{
-    font-weight: bold;
+.msg{
     font-size: 16px;
+    margin-top: 20px;
+    padding: 10px;
+    border-style: none;
+    border-width: 0px;
+
 }
