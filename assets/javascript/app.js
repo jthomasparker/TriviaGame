@@ -144,12 +144,14 @@ window.onload = function() {
     })
 
     $("#scoreboard-title").on("click", function(){
-        if(scoreboardSwitcher){
-            scoreboardSwitcher = false;
-        } else {
-            scoreboardSwitcher = true;
-        }
+        if(!activeGame){
+            if(scoreboardSwitcher){
+                scoreboardSwitcher = false;
+            } else {
+                scoreboardSwitcher = true;
+            }
         updateScoreboard();
+        }
     })
 }
 
